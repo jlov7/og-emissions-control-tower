@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+node_modules/
+frontend/.next/
+frontend/out/
+.DS_Store

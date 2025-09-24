@@ -1,0 +1,4 @@
+id,site_id,detected_at_utc,detection_type,est_ch4_kgph,confidence,lat,lon,status,investigation_started_utc,report_submitted_utc,notes
+B101,S1,2025-09-26T08:30:00Z,satellite,610,0.82,29.7622,-95.3644,NEW,,,{}
+B102,S2,2025-09-26T11:45:00Z,OGI,240,0.78,29.4288,-98.4888,NEW,,,{}
+B103,S1,2025-09-27T02:05:00Z,continuous,120,0.51,29.7588,-95.3704,NEW,,,{}
