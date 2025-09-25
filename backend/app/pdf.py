@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from io import BytesIO
 from typing import List
 
 from fpdf import FPDF
@@ -11,13 +10,13 @@ from .schemas import ActionLogEntry, EventOut, RunbookItem
 
 def _format_dt(dt: datetime | None) -> str:
     if dt is None:
-        return "—"
+        return "N/A"
     return dt.strftime("%Y-%m-%d %H:%M UTC")
 
 
 def _format_hours(hours: float) -> str:
     if hours is None:
-        return "—"
+        return "N/A"
     days = hours / 24
     if abs(days) >= 1:
         return f"{days:.1f} d"
@@ -34,7 +33,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
     pdf.add_page()
 
     pdf.set_font("Helvetica", "B", 20)
-    pdf.cell(0, 12, f"Emissions Event Report — {event.id}", ln=True, align="C")
+    pdf.cell(0, 12, f"Emissions Event Report - {event.id}", ln=True, align="C")
     pdf.ln(4)
 
     pdf.set_font("Helvetica", "", 12)
@@ -55,7 +54,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
                 ("Location", f"{event.asset.lat:.4f}, {event.asset.lon:.4f}"),
                 ("Detection Type", event.detection_type.upper()),
                 ("Detected", _format_dt(event.detected_at_utc)),
-                ("Estimated CH₄", f"{event.est_ch4_kgph:.0f} kg/h"),
+                ("Estimated CH4", f"{event.est_ch4_kgph:.0f} kg/h"),
                 ("Confidence", f"{event.confidence:.2f}"),
             ]
         ),
@@ -101,7 +100,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
     pdf.set_font("Helvetica", "", 11)
     if event.runbook:
         for item in event.runbook:
-            status = "✓" if item.completed else "○"
+            status = "[x]" if item.completed else "[ ]"
             timestamp = _format_dt(item.completed_at_utc)
             pdf.cell(0, 6, f"{status} {item.label} ({timestamp})", ln=True)
     else:
@@ -114,17 +113,19 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
     pdf.set_font("Helvetica", "", 11)
     if event.action_log:
         for entry in event.action_log:
-            pdf.multi_cell(0, 6, f"{_format_dt(entry.timestamp_utc)} — {entry.message}")
+            pdf.multi_cell(0, 6, f"{_format_dt(entry.timestamp_utc)} - {entry.message}")
             pdf.ln(1)
     else:
         pdf.cell(0, 6, "No follow-up actions logged yet.", ln=True)
 
     pdf.set_y(-25)
     pdf.set_font("Helvetica", "I", 9)
-    pdf.multi_cell(0, 5, "Demo only — synthetic data. Not for operational use.", align="C")
+    pdf.multi_cell(0, 5, "Demo only - synthetic data. Not for operational use.", align="C")
 
-    output = pdf.output(dest="S").encode("latin1")
-    return output
+    output = pdf.output(dest="S")
+    if isinstance(output, str):
+        return output.encode("latin1")
+    return bytes(output)
 
 
 def textwrap(rows: List[tuple[str, str]]) -> str:
