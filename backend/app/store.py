@@ -132,6 +132,8 @@ class DataStore:
                 return None
             return value.to_pydatetime()
         if isinstance(value, datetime):
+            if pd.isna(value):
+                return None
             return value
         if isinstance(value, str) and value:
             try:
