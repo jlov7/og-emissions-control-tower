@@ -20,7 +20,7 @@ from .schemas import (
     AIResponse,
 )
 from .store import DataStore, CSVAppendResult, store
-from .ai import AIUnavailable, ai_client
+from . import ai
 from .triage import evaluate_event
 
 app = FastAPI(title="OG Emissions Control Tower Demo", version="0.1.0")
@@ -146,7 +146,7 @@ async def import_events(file: UploadFile = File(...)) -> CSVImportResult:
 
 @app.post('/api/events/{event_id}/assistant', response_model=AIResponse)
 def get_event_assistant(event_id: str, payload: AIRequest | None = Body(default=None)) -> AIResponse:
-    if not ai_client.is_configured:
+    if not ai.ai_client.is_configured:
         raise HTTPException(status_code=503, detail='AI assistant is unavailable in this environment.')
     try:
         event = store.get_event(event_id)
@@ -155,8 +155,8 @@ def get_event_assistant(event_id: str, payload: AIRequest | None = Body(default=
     event_out = _build_event_out(store, event)
     focus = payload.focus if payload else None
     try:
-        result = ai_client.generate_event_brief(event_out, focus=focus)
-    except AIUnavailable as exc:
+        result = ai.ai_client.generate_event_brief(event_out, focus=focus)
+    except ai.AIUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return AIResponse(model=result.model, content=result.content, usage=result.usage)
 

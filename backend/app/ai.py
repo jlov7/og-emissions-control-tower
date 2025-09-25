@@ -10,6 +10,7 @@ from .schemas import EventOut
 
 DEFAULT_ENDPOINT = "https://models.github.ai/inference/v1/chat/completions"
 DEFAULT_MODEL = "gpt-4.1-mini"
+DEFAULT_TIMEOUT_SECONDS = 30.0
 
 
 class AIUnavailable(RuntimeError):
@@ -24,22 +25,43 @@ class AIResult:
 
 
 class GitHubModelsClient:
-    def __init__(self) -> None:
-        self._token = os.getenv("GITHUB_MODELS_KEY") or os.getenv("GITHUB_TOKEN")
-        self._endpoint = os.getenv("GITHUB_MODELS_ENDPOINT", DEFAULT_ENDPOINT)
-        self._model = os.getenv("GITHUB_MODELS_MODEL", DEFAULT_MODEL)
-        self._timeout = float(os.getenv("GITHUB_MODELS_TIMEOUT", "30"))
+    """Minimal GitHub Models client that reads environment variables on each call."""
+
+    token_env = "GITHUB_MODELS_KEY"
+    fallback_token_env = "GITHUB_TOKEN"
+    endpoint_env = "GITHUB_MODELS_ENDPOINT"
+    model_env = "GITHUB_MODELS_MODEL"
+    timeout_env = "GITHUB_MODELS_TIMEOUT"
 
     @property
-    def is_configured(self) -> bool:
-        return bool(self._token)
+    def token(self) -> Optional[str]:
+        return os.getenv(self.token_env) or os.getenv(self.fallback_token_env)
+
+    @property
+    def endpoint(self) -> str:
+        return os.getenv(self.endpoint_env, DEFAULT_ENDPOINT)
 
     @property
     def model_name(self) -> str:
-        return self._model
+        return os.getenv(self.model_env, DEFAULT_MODEL)
+
+    @property
+    def timeout(self) -> float:
+        value = os.getenv(self.timeout_env)
+        if not value:
+            return DEFAULT_TIMEOUT_SECONDS
+        try:
+            return float(value)
+        except ValueError:
+            return DEFAULT_TIMEOUT_SECONDS
+
+    @property
+    def is_configured(self) -> bool:
+        return bool(self.token)
 
     def generate_event_brief(self, event: EventOut, focus: Optional[str] = None) -> AIResult:
-        if not self.is_configured:
+        token = self.token
+        if not token:
             raise AIUnavailable("GitHub Models token not available.")
 
         system_prompt = (
@@ -66,10 +88,10 @@ class GitHubModelsClient:
             summary_lines.append("Runbook pending: " + ", ".join(pending_items))
 
         if event.action_log:
-            latest_actions = ", ".join(
+            recent = ", ".join(
                 f"{entry.timestamp_utc.isoformat()} - {entry.message}" for entry in event.action_log[-3:]
             )
-            summary_lines.append(f"Recent actions: {latest_actions}")
+            summary_lines.append(f"Recent actions: {recent}")
 
         if focus:
             summary_lines.append(f"Focus area: {focus}")
@@ -77,7 +99,7 @@ class GitHubModelsClient:
         user_prompt = "\n".join(summary_lines)
 
         payload: Dict[str, Any] = {
-            "model": self._model,
+            "model": self.model_name,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {
@@ -92,17 +114,17 @@ class GitHubModelsClient:
         }
 
         headers = {
-            "Authorization": f"Bearer {self._token}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
 
         try:
             response = httpx.post(
-                self._endpoint,
+                self.endpoint,
                 json=payload,
                 headers=headers,
-                timeout=self._timeout,
+                timeout=self.timeout,
             )
         except httpx.HTTPError as exc:
             raise AIUnavailable(f"Failed to contact GitHub Models endpoint: {exc}") from exc
@@ -128,7 +150,7 @@ class GitHubModelsClient:
 
         usage = data.get("usage")
 
-        return AIResult(content=content.strip(), model=self._model, usage=usage)
+        return AIResult(content=content.strip(), model=self.model_name, usage=usage)
 
 
-ai_client = GitHubModelsClient()
+aio_client = GitHubModelsClient()
