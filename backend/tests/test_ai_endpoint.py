@@ -1,38 +1,4 @@
 from __future__ import annotations
-import sys
-import types
-
-if 'fpdf' not in sys.modules:
-    class _DummyFPDF:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def set_auto_page_break(self, *args, **kwargs):
-            pass
-
-        def add_page(self, *args, **kwargs):
-            pass
-
-        def set_font(self, *args, **kwargs):
-            pass
-
-        def cell(self, *args, **kwargs):
-            pass
-
-        def ln(self, *args, **kwargs):
-            pass
-
-        def multi_cell(self, *args, **kwargs):
-            pass
-
-        def set_y(self, *args, **kwargs):
-            pass
-
-        def output(self, *args, **kwargs):
-            return ''
-
-    sys.modules['fpdf'] = types.SimpleNamespace(FPDF=_DummyFPDF)
-
 
 from typing import Any, Dict
 

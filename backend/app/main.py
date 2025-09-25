@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 
 from .pdf import generate_event_report_pdf
 from .schemas import (
@@ -161,7 +161,7 @@ def get_event_assistant(event_id: str, payload: AIRequest | None = Body(default=
     return AIResponse(model=result.model, content=result.content, usage=result.usage)
 
 @app.get("/api/events/{event_id}/report.pdf")
-def download_event_report(event_id: str) -> StreamingResponse:
+def download_event_report(event_id: str) -> Response:
     try:
         event = store.get_event(event_id)
     except KeyError as exc:
@@ -169,8 +169,8 @@ def download_event_report(event_id: str) -> StreamingResponse:
     payload = _build_event_out(store, event)
     pdf_bytes = generate_event_report_pdf(payload)
     file_name = f"report_{event_id}.pdf"
-    return StreamingResponse(
-        iter([pdf_bytes]),
+    return Response(
+        content=pdf_bytes,
         media_type="application/pdf",
         headers={
             "Content-Disposition": f"attachment; filename={file_name}",

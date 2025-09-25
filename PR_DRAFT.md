@@ -7,7 +7,7 @@
 - [x] Added pytest smoke tests, reusable frontend API client, and a downloadable CSV sample batch for quick demos.
 
 ## Testing
-- [ ] Backend endpoints return expected payloads (`uvicorn app.main:app --reload` + manual curl/UI checks).
+- [x] Backend endpoints return expected payloads (`make test` API flow coverage).
 - [ ] Frontend renders map markers and drawer interactions (`npm run dev`).
 - [x] CSV import updates events list and persists to storage (`make test`).
 - [x] PDF reports generate without errors (`make test` covers log + manual).

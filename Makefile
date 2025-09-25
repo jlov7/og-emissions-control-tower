@@ -27,4 +27,4 @@ requirements:
 
 
 test:
-	@cd backend && pytest
+	@cd backend && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest

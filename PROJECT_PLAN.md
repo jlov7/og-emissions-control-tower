@@ -33,6 +33,7 @@
 - **PDF layout regressions**: render deterministic sections with consistent fonts.
 
 ## Verification Checklist
-- [x] Backend smoke suite (`make test`) covering triage math, CSV ingestion, runbook logging, and AI fallback.
+- [x] Backend smoke + integration suite (`make test`) covering triage math, CSV ingestion, lifecycle APIs, PDF export, and AI fallback.
 - [x] Frontend lint + static type analysis (`make lint`, `make type-check`).
+- [x] Production build compilation (`npm run build`).
 - [ ] In-browser walkthrough (map, filters, CSV upload, theme toggle, PDF) to be exercised in Codespaces during review.
