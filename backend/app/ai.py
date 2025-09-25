@@ -153,4 +153,4 @@ class GitHubModelsClient:
         return AIResult(content=content.strip(), model=self.model_name, usage=usage)
 
 
-aio_client = GitHubModelsClient()
+ai_client = GitHubModelsClient()
