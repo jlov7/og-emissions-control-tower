@@ -24,18 +24,19 @@ export function TriageChip({ score, bucket, breakdown }: Props) {
 
   return (
     <div className="relative inline-flex">
-      <button
-        type="button"
-        className={`chip ${bucketClass} shadow-sm transition hover:opacity-90 focus-visible:ring-2`}
+      <div
+        className={`chip ${bucketClass} shadow-sm transition hover:opacity-90`}
         aria-describedby={tooltipId}
+        role="img"
+        aria-label={`Triage ${bucket.toLowerCase()} score ${score.toFixed(2)}`}
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setIsOpen(false)}
+        onTouchStart={() => setIsOpen(true)}
+        onTouchEnd={() => setIsOpen(false)}
       >
         <span className="font-semibold">{score.toFixed(2)}</span>
         <span className="uppercase tracking-wide">{bucket}</span>
-      </button>
+      </div>
       {isOpen && (
         <div
           role="tooltip"
