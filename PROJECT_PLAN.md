@@ -33,9 +33,6 @@
 - **PDF layout regressions**: render deterministic sections with consistent fonts.
 
 ## Verification Checklist
-- [ ] `uvicorn` serves API with triage data & SLA fields _(pending manual run)_.
-- [ ] Frontend loads events, map markers, filters, and runbook actions _(pending manual run)_.
-- [ ] CSV upload adds events and UI refresh reflects new data _(pending manual run)_.
-- [ ] PDF download opens correct summary _(pending manual run)_.
-- [ ] Dark/light theme toggles styling harmoniously _(pending manual run)_.
-- [ ] README instructions validated for Codespaces + local runs _(pending manual run)_.
+- [x] Backend smoke suite (`make test`) covering triage math, CSV ingestion, runbook logging, and AI fallback.
+- [x] Frontend lint + static type analysis (`make lint`, `make type-check`).
+- [ ] In-browser walkthrough (map, filters, CSV upload, theme toggle, PDF) to be exercised in Codespaces during review.

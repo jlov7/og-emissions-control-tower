@@ -42,6 +42,7 @@ const statDescriptors = [
 
 export function SummaryStats({ events, onJumpToEvent }: SummaryStatsProps) {
   const summary = useMemo<SummaryTotals>(() => buildSummary(events), [events]);
+  const nextBreach = summary.nextBreach;
 
   return (
     <section className="grid gap-3 rounded-3xl bg-surface-light p-5 shadow-card ring-1 ring-slate-100 dark:bg-surface-dark dark:ring-slate-800 sm:grid-cols-2 lg:grid-cols-4">
@@ -56,13 +57,13 @@ export function SummaryStats({ events, onJumpToEvent }: SummaryStatsProps) {
             </p>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{descriptor.description}</p>
           </div>
-          {descriptor.key === "breached" && summary.nextBreach && (
+          {descriptor.key === "breached" && nextBreach && (
             <button
               type="button"
-              onClick={() => onJumpToEvent(summary.nextBreach.id)}
+              onClick={() => onJumpToEvent(nextBreach.id)}
               className="mt-4 inline-flex items-center gap-2 rounded-full bg-sla-breach px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Review {summary.nextBreach.id} ({summary.nextBreach.label})
+              Review {nextBreach.id} ({nextBreach.label})
             </button>
           )}
         </article>

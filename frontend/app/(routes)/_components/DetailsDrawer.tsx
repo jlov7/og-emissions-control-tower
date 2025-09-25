@@ -48,6 +48,15 @@ export function DetailsDrawer({
   onAskAi,
   onClearAi,
 }: Props) {
+  const actionLog = useMemo(() => {
+    if (!event) {
+      return [];
+    }
+    return [...event.action_log].sort(
+      (a, b) => new Date(a.timestamp_utc).getTime() - new Date(b.timestamp_utc).getTime()
+    );
+  }, [event]);
+
   if (!event) {
     return (
       <div className="card h-full">
@@ -57,14 +66,6 @@ export function DetailsDrawer({
       </div>
     );
   }
-
-  const actionLog = useMemo(
-    () =>
-      [...event.action_log].sort((a, b) =>
-        new Date(a.timestamp_utc).getTime() - new Date(b.timestamp_utc).getTime()
-      ),
-    [event.action_log]
-  );
 
   const formatDate = (iso: string | null) => (iso ? dateFormatter.format(new Date(iso)) : "—");
 

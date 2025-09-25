@@ -11,6 +11,7 @@
 - [ ] Frontend renders map markers and drawer interactions (`npm run dev`).
 - [x] CSV import updates events list and persists to storage (`make test`).
 - [x] PDF reports generate without errors (`make test` covers log + manual).
+- [x] Frontend lint + type-check clean (`make lint`, `make type-check`).
 
 ## Screenshots / Media
 - Add when available.

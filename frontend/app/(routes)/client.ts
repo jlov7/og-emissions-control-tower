@@ -1,11 +1,32 @@
 import type { EventRecord, EventsResponse } from "./types";
 
 const ENV_API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
-const FALLBACK_BASE = "/backend";
+
+function resolveRuntimeBase(): string {
+  if (ENV_API_BASE) {
+    return ENV_API_BASE;
+  }
+
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+
+    if (hostname.endsWith(".github.dev")) {
+      // In Codespaces convert the frontend port suffix (e.g. -3000) to the backend port.
+      const rewrittenHost = hostname.replace(/-(\d+)\.app\.github\.dev$/, () => "-8000.app.github.dev");
+      return `${protocol}//${rewrittenHost}/api`;
+    }
+
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0") {
+      return "/backend";
+    }
+  }
+
+  return "/backend";
+}
 
 export function buildApiUrl(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${ENV_API_BASE ?? FALLBACK_BASE}${normalized}`;
+  return `${resolveRuntimeBase()}${normalized}`;
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
