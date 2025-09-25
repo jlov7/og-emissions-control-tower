@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -84,3 +84,14 @@ class CSVImportResult(BaseModel):
     imported: int
     skipped: int
     message: str
+
+
+class AIRequest(BaseModel):
+    focus: Optional[str] = Field(None, description="Optional focus area for the assistant (e.g. 'communications').")
+
+
+class AIResponse(BaseModel):
+    model: str
+    content: str
+    usage: Optional[Dict[str, Any]] = None
+

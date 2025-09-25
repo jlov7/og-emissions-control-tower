@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
@@ -16,8 +16,11 @@ from .schemas import (
     EventStatus,
     EventsResponse,
     RunbookCompletionRequest,
+    AIRequest,
+    AIResponse,
 )
 from .store import DataStore, CSVAppendResult, store
+from .ai import AIUnavailable, ai_client
 from .triage import evaluate_event
 
 app = FastAPI(title="OG Emissions Control Tower Demo", version="0.1.0")
@@ -138,6 +141,24 @@ async def import_events(file: UploadFile = File(...)) -> CSVImportResult:
         message=f"Imported {result.imported} event(s); skipped {result.skipped} duplicate(s)",
     )
 
+
+
+
+@app.post('/api/events/{event_id}/assistant', response_model=AIResponse)
+def get_event_assistant(event_id: str, payload: AIRequest | None = Body(default=None)) -> AIResponse:
+    if not ai_client.is_configured:
+        raise HTTPException(status_code=503, detail='AI assistant is unavailable in this environment.')
+    try:
+        event = store.get_event(event_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    event_out = _build_event_out(store, event)
+    focus = payload.focus if payload else None
+    try:
+        result = ai_client.generate_event_brief(event_out, focus=focus)
+    except AIUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return AIResponse(model=result.model, content=result.content, usage=result.usage)
 
 @app.get("/api/events/{event_id}/report.pdf")
 def download_event_report(event_id: str) -> StreamingResponse:

@@ -67,6 +67,12 @@ All endpoints live under `http://localhost:8000/api`.
 - `GET /events/{id}/report.pdf` – stream audit-ready PDF.
 
 
+## AI assistant (Codespaces)
+- The backend automatically uses the built-in `GITHUB_TOKEN` that Codespaces injects to access the free tier of GitHub Models.
+- From the event drawer, click **AI briefing** to generate response steps using `github/gpt-4.1-mini`.
+- Outside of Codespaces (or without a token), the button gracefully reports that the assistant is unavailable.
+- Set `GITHUB_MODELS_MODEL` or `GITHUB_MODELS_KEY` if you want to point at a different hosted model or paid deployment.
+
 ## Sample & Testing
 - **Sample CSV:** `/frontend/public/samples/demo_events_batch.csv` is linked directly from the toolbar for quick uploads.
 - **Backend tests:** `make test` runs the pytest smoke suite (triage math, CSV ingestion, runbook logging).

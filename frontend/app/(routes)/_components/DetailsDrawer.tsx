@@ -18,10 +18,17 @@ interface Props {
   isInvestigating: boolean;
   isReporting: boolean;
   completingItem: string | null;
+  aiContent: string | null;
+  aiModel: string | null;
+  aiUpdatedAt: string | null;
+  aiError: string | null;
+  aiLoading: boolean;
   onStartInvestigation: (eventId: string) => void;
   onMarkReported: (eventId: string) => void;
   onCompleteRunbook: (eventId: string, itemId: string) => void;
   onDownloadPdf: (eventId: string) => void;
+  onAskAi: (eventId: string) => void;
+  onClearAi: (eventId: string) => void;
 }
 
 export function DetailsDrawer({
@@ -33,6 +40,13 @@ export function DetailsDrawer({
   onMarkReported,
   onCompleteRunbook,
   onDownloadPdf,
+  aiContent,
+  aiModel,
+  aiUpdatedAt,
+  aiError,
+  aiLoading,
+  onAskAi,
+  onClearAi,
 }: Props) {
   if (!event) {
     return (
@@ -145,6 +159,45 @@ export function DetailsDrawer({
         <div className="flex flex-col gap-2">
           {event.runbook.map(renderRunbookItem)}
         </div>
+      </section>
+
+      <section className="mb-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            AI assistant
+          </h3>
+          {aiContent && (
+            <button
+              type="button"
+              onClick={() => onClearAi(event.id)}
+              className="text-xs font-semibold text-accent-primary underline-offset-4 hover:underline dark:text-accent-secondary"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Generate a briefing using GitHub Models (available automatically inside Codespaces).</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => onAskAi(event.id)}
+            disabled={aiLoading}
+            className="rounded-full border border-accent-primary px-4 py-2 text-sm font-semibold text-accent-primary transition hover:bg-accent-primary/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-accent-secondary dark:text-accent-secondary"
+          >
+            {aiLoading ? "Calling GitHub Models…" : aiContent ? "Refresh briefing" : "AI briefing"}
+          </button>
+        </div>
+        {aiError && (
+          <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/60 dark:bg-red-900/30 dark:text-red-100">
+            {aiError}
+          </div>
+        )}
+        {aiContent && (
+          <article className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <p className="mb-2 text-xs text-slate-500 dark:text-slate-300">{aiModel ?? "github/gpt-4.1-mini"} · {aiUpdatedAt ? new Date(aiUpdatedAt).toLocaleTimeString() : "just now"}</p>
+            <pre className="whitespace-pre-wrap text-sm leading-6">{aiContent}</pre>
+          </article>
+        )}
       </section>
 
       <section className="mb-4 space-y-2">

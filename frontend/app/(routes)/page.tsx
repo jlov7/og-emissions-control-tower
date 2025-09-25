@@ -25,6 +25,9 @@ export default function HomePage() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [banner, setBanner] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [aiNotes, setAiNotes] = useState<Record<string, { content: string; model: string; updatedAt: string }>>({});
+  const [aiErrors, setAiErrors] = useState<Record<string, string>>({});
+  const [aiLoadingId, setAiLoadingId] = useState<string | null>(null);
 
   const applyTheme = useCallback((nextTheme: "light" | "dark") => {
     setTheme(nextTheme);
@@ -145,6 +148,55 @@ export default function HomePage() {
     }
   };
 
+  const handleAskAi = async (eventId: string) => {
+    setAiLoadingId(eventId);
+    setAiErrors((prev) => {
+      const next = { ...prev };
+      delete next[eventId];
+      return next;
+    });
+    try {
+      const response = await fetch(`${API_BASE}/api/events/${eventId}/assistant`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!response.ok) {
+        const detail = await response.json().catch(() => null);
+        throw new Error(detail?.detail ?? response.statusText ?? "AI request failed");
+      }
+      const payload = await response.json();
+      setAiNotes((prev) => ({
+        ...prev,
+        [eventId]: {
+          content: payload.content as string,
+          model: payload.model as string,
+          updatedAt: new Date().toISOString(),
+        },
+      }));
+      setError(null);
+      setBanner(`AI briefing generated for ${eventId}.`);
+    } catch (err) {
+      setAiErrors((prev) => ({
+        ...prev,
+        [eventId]: err instanceof Error ? err.message : "AI assistant unavailable",
+      }));
+    } finally {
+      setAiLoadingId(null);
+    }
+  };
+
+  const handleClearAi = (eventId: string) => {
+    setAiNotes((prev) => {
+      const { [eventId]: _, ...rest } = prev;
+      return rest;
+    });
+    setAiErrors((prev) => {
+      const { [eventId]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const handleDownloadPdf = async (eventId: string) => {
     try {
       const blob = await downloadEventPdf(eventId);
@@ -243,10 +295,17 @@ export default function HomePage() {
             isInvestigating={isInvestigating}
             isReporting={isReporting}
             completingItem={completingItem}
+            aiContent={selectedId ? aiNotes[selectedId]?.content ?? null : null}
+            aiModel={selectedId ? aiNotes[selectedId]?.model ?? null : null}
+            aiUpdatedAt={selectedId ? aiNotes[selectedId]?.updatedAt ?? null : null}
+            aiError={selectedId ? aiErrors[selectedId] ?? null : null}
+            aiLoading={selectedId ? aiLoadingId === selectedId : false}
             onStartInvestigation={handleStartInvestigation}
             onMarkReported={handleMarkReported}
             onCompleteRunbook={handleRunbookComplete}
             onDownloadPdf={handleDownloadPdf}
+            onAskAi={handleAskAi}
+            onClearAi={handleClearAi}
           />
         </div>
       </section>
