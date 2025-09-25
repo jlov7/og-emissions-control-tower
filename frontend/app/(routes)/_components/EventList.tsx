@@ -27,14 +27,15 @@ interface Props {
 export function EventList({ events, selectedId, onSelect }: Props) {
   if (events.length === 0) {
     return (
-      <div className="card text-center text-sm text-slate-500 dark:text-slate-300">
-        No events match the current filters.
+      <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-300">
+        No events match the current filters. Try switching tabs or clearing the SLA-only toggle.
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
+      <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Showing {events.length} event{events.length === 1 ? "" : "s"}</p>
       {events.map((event) => {
         const isActive = event.id === selectedId;
         const detectionIcon = detectionIcons[event.detection_type] ?? "/icons/alarm.svg";

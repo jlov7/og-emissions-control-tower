@@ -91,13 +91,21 @@ export function DetailsDrawer({
           {event.asset.site_name}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-300">
-          Detection {event.detection_type.toUpperCase()} · {event.est_ch4_kgph.toFixed(0)} kg/h CH₄ ·
-          Confidence {Math.round(event.confidence * 100)}%
+          Detection {event.detection_type.toUpperCase()} · {event.est_ch4_kgph.toFixed(0)} kg/h CH₄ · Confidence {Math.round(event.confidence * 100)}%
         </p>
-        <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
-          Status: {event.status}
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
+          <span>Status: {event.status}</span>
+          <span className="hidden sm:inline">•</span>
+          <span>Triage score {event.triage_score.toFixed(2)} ({event.triage_bucket})</span>
+        </div>
       </header>
+
+      <div className="mb-4 rounded-2xl border border-accent-primary/30 bg-accent-primary/10 p-4 text-sm text-slate-700 dark:border-accent-secondary/30 dark:bg-accent-secondary/10 dark:text-slate-100">
+        <p className="font-semibold">How to use this panel</p>
+        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+          Work through the runbook, timestamp your investigation/report, and export the PDF when everything is ready for an audit trail.
+        </p>
+      </div>
 
       <section className="mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -132,7 +140,7 @@ export function DetailsDrawer({
           Runbook — What to check
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Mark items as you complete them; they are mirrored into the audit log and PDF export.
+          Mark items as you complete them; the audit log and PDF update instantly so compliance reviewers can follow along.
         </p>
         <div className="flex flex-col gap-2">
           {event.runbook.map(renderRunbookItem)}
@@ -151,7 +159,9 @@ export function DetailsDrawer({
             </li>
           ))}
           {actionLog.length === 0 && (
-            <li className="text-xs text-slate-500 dark:text-slate-400">No actions captured yet.</li>
+            <li className="rounded-lg border border-dashed border-slate-200 p-3 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              No actions captured yet. Start the investigation or check runbook items to populate this log.
+            </li>
           )}
         </ul>
       </section>
@@ -162,6 +172,7 @@ export function DetailsDrawer({
           onClick={() => onStartInvestigation(event.id)}
           disabled={isInvestigating}
           className="rounded-full bg-accent-primary px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Stamp investigation start timestamp for this event"
         >
           {isInvestigating ? "Updating…" : "Start Investigation"}
         </button>
@@ -170,6 +181,7 @@ export function DetailsDrawer({
           onClick={() => onMarkReported(event.id)}
           disabled={isReporting}
           className="rounded-full bg-slate-200 px-5 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+          aria-label="Stamp report submission timestamp for this event"
         >
           {isReporting ? "Saving…" : "Mark Reported"}
         </button>
@@ -177,6 +189,7 @@ export function DetailsDrawer({
           type="button"
           onClick={() => onDownloadPdf(event.id)}
           className="rounded-full border border-accent-secondary px-5 py-2 text-sm font-semibold text-accent-secondary transition hover:bg-accent-secondary/10"
+          aria-label="Generate audit-ready PDF for this event"
         >
           Generate PDF
         </button>

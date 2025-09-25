@@ -6,6 +6,8 @@ import { DetailsDrawer } from "./_components/DetailsDrawer";
 import { EventList } from "./_components/EventList";
 import { Map } from "./_components/Map";
 import { Toolbar } from "./_components/Toolbar";
+import { OnboardingModal } from "./_components/OnboardingModal";
+import { SummaryStats } from "./_components/SummaryStats";
 import { downloadEventPdf, fetchEvents as fetchEventsApi, postEventAction, uploadEventsCsv } from "./client";
 import type { EventRecord, EventsResponse } from "./types";
 
@@ -22,6 +24,7 @@ export default function HomePage() {
   const [completingItem, setCompletingItem] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [banner, setBanner] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const applyTheme = useCallback((nextTheme: "light" | "dark") => {
     setTheme(nextTheme);
@@ -37,6 +40,14 @@ export default function HomePage() {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     applyTheme(stored ?? (prefersDark ? "dark" : "light"));
   }, [applyTheme]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const seen = window.localStorage.getItem("ect-onboarded");
+    if (!seen) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -161,8 +172,26 @@ export default function HomePage() {
     }
   };
 
+  const handleJumpToEvent = (eventId: string) => {
+    setSelectedId(eventId);
+    setError(null);
+    const target = events.find((event) => event.id === eventId);
+    if (target) {
+      setBanner(`Jumped to ${eventId} — ${target.asset.site_name}`);
+    }
+  };
+
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <OnboardingModal
+        open={showOnboarding}
+        onClose={() => {
+          setShowOnboarding(false);
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("ect-onboarded", "1");
+          }
+        }}
+      />
       <Toolbar
         triageFilter={triageFilter}
         statusFilter={statusFilter}
@@ -174,7 +203,10 @@ export default function HomePage() {
         onRefresh={loadEvents}
         onCsvUpload={handleCsvUpload}
         onThemeToggle={() => applyTheme(theme === "light" ? "dark" : "light")}
+        onShowGuide={() => setShowOnboarding(true)}
       />
+
+      <SummaryStats events={events} onJumpToEvent={handleJumpToEvent} />
 
       {error && (
         <div className="rounded-xl border border-red-400 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500 dark:bg-red-900/40 dark:text-red-100">

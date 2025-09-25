@@ -5,7 +5,7 @@ A Codespaces-ready, API-key-free demo that brings methane detections into a sing
 ## Highlights
 - **Synthetic methane detections** with deterministic triage scoring, SLA timers (5-day investigate / 15-day report), and action logs.
 - **FastAPI backend** that serves assets/events, updates lifecycle states, appends CSV uploads, and renders fpdf2 reports.
-- **Next.js frontend** featuring MapLibre markers, triage tooltips, SLA chips, status tabs, CSV importer, runbook checklist, and theme toggle.
+- **Next.js frontend** featuring MapLibre markers, triage tooltips, SLA chips, status tabs, CSV importer, runbook checklist, theme toggle, and a built-in welcome tour.
 - **Audit-ready PDFs** summarizing site context, scoring rationale, SLA compliance, runbook progress, and action history.
 - **No external keys** – fully self-contained for Codespaces or local development.
 
@@ -44,8 +44,9 @@ make test        # Backend pytest quick checks
 ```
 
 ## Using the Demo
-- **Explore the map:** Markers are colored by triage bucket (High red, Med orange, Low yellow). Selecting a card or marker syncs the map, list, and detail drawer.
+- **Explore the map:** Markers are colored by triage bucket (High red, Med orange, Low yellow). Selecting a card or marker syncs the map, list, and detail drawer—use the summary callouts to jump straight into problem events.
 - **Triage insight:** Hover or focus the triage chip to see the scoring breakdown (CH₄ rate, detection weight, confidence, recency boost).
+- **Guided onboarding:** Launch the in-app guide anytime via the toolbar to recap the key workflows.
 - **SLA focus:** Toggle the "SLA breaches only" filter or inspect the SLA chips (green = on track, red = breached).
 - **Status tabs:** Jump between NEW / INVESTIGATING / REPORTED workflows.
 - **Runbook checklist:** Within the detail drawer, mark "What to check" items. Each completion is logged and appears in the PDF.
