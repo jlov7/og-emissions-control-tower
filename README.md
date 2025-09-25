@@ -55,6 +55,8 @@ make test        # Backend pytest quick checks
 - **Import more detections:** Use the **Import CSV** button to append events. A ready-made sample lives at [`/samples/demo_events_batch.csv`](frontend/public/samples/demo_events_batch.csv).
 - **Theme toggle:** Switch between light and dark via the toolbar.
 
+> Frontend requests proxy through the Next.js dev server at `/backend/*`, so browsers always talk to the same origin. When you deploy the frontend separately, set `NEXT_PUBLIC_API_BASE` to your backend’s `/api` base (for example `https://api.example.com/api`).
+
 ## API Reference
 All endpoints live under `http://localhost:8000/api`.
 - `GET /assets` – list assets with coordinates.
@@ -72,6 +74,7 @@ All endpoints live under `http://localhost:8000/api`.
 - From the event drawer, click **AI briefing** to generate response steps using `github/gpt-4.1-mini`.
 - Outside of Codespaces (or without a token), the button gracefully reports that the assistant is unavailable.
 - Set `GITHUB_MODELS_MODEL` or `GITHUB_MODELS_KEY` if you want to point at a different hosted model or paid deployment.
+- When the frontend runs outside Codespaces, set both `NEXT_PUBLIC_API_BASE` (pointing to your backend `/api` base) and the appropriate `GITHUB_MODELS_*` token if you want AI briefings to continue working.
 
 ## Sample & Testing
 - **Sample CSV:** `/frontend/public/samples/demo_events_batch.csv` is linked directly from the toolbar for quick uploads.

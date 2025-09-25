@@ -1,9 +1,15 @@
 import type { EventRecord, EventsResponse } from "./types";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const ENV_API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
+const FALLBACK_BASE = "/backend";
+
+export function buildApiUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${ENV_API_BASE ?? FALLBACK_BASE}${normalized}`;
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, init);
+  const response = await fetch(buildApiUrl(path), init);
   if (!response.ok) {
     const detail = await safeParseError(response);
     throw new Error(detail ?? `Request failed with status ${response.status}`);
@@ -31,11 +37,11 @@ async function safeParseError(response: Response): Promise<string | null> {
 }
 
 export async function fetchEvents(): Promise<EventsResponse> {
-  return apiFetch<EventsResponse>("/api/events");
+  return apiFetch<EventsResponse>("/events");
 }
 
 export async function getEvent(eventId: string): Promise<EventRecord> {
-  return apiFetch<EventRecord>(`/api/events/${eventId}`);
+  return apiFetch<EventRecord>(`/events/${eventId}`);
 }
 
 export async function postEventAction(
@@ -50,13 +56,13 @@ export async function postEventAction(
     init.body = JSON.stringify(body);
     init.headers = { "Content-Type": "application/json" };
   }
-  return apiFetch<EventRecord>(`/api/events/${eventId}/${action}`, init);
+  return apiFetch<EventRecord>(`/events/${eventId}/${action}`, init);
 }
 
 export async function uploadEventsCsv(file: File): Promise<{ message: string }> {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await fetch(`${API_BASE}/api/events/import`, {
+  const response = await fetch(buildApiUrl(`/events/import`), {
     method: "POST",
     body: formData,
   });
@@ -69,7 +75,7 @@ export async function uploadEventsCsv(file: File): Promise<{ message: string }> 
 }
 
 export async function downloadEventPdf(eventId: string): Promise<Blob> {
-  const response = await fetch(`${API_BASE}/api/events/${eventId}/report.pdf`);
+  const response = await fetch(buildApiUrl(`/events/${eventId}/report.pdf`));
   if (!response.ok) {
     const detail = await safeParseError(response);
     throw new Error(detail ?? "Unable to generate PDF");

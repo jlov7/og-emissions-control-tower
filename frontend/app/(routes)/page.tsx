@@ -8,7 +8,13 @@ import { Map } from "./_components/Map";
 import { Toolbar } from "./_components/Toolbar";
 import { OnboardingModal } from "./_components/OnboardingModal";
 import { SummaryStats } from "./_components/SummaryStats";
-import { downloadEventPdf, fetchEvents as fetchEventsApi, postEventAction, uploadEventsCsv } from "./client";
+import {
+  buildApiUrl,
+  downloadEventPdf,
+  fetchEvents as fetchEventsApi,
+  postEventAction,
+  uploadEventsCsv,
+} from "./client";
 import type { EventRecord, EventsResponse } from "./types";
 
 export default function HomePage() {
@@ -156,7 +162,7 @@ export default function HomePage() {
       return next;
     });
     try {
-      const response = await fetch(`${API_BASE}/api/events/${eventId}/assistant`, {
+      const response = await fetch(buildApiUrl(`/events/${eventId}/assistant`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
