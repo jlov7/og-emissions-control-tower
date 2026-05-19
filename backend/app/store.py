@@ -272,8 +272,30 @@ class DataStore:
                 existing_ids.add(event_id)
                 imported += 1
             if rows_to_add:
-                additions = pd.DataFrame(rows_to_add)
-                self._events_df = pd.concat([self._events_df, additions], ignore_index=True)
+                if self._events_df.empty:
+                    self._events_df = pd.DataFrame(rows_to_add)
+                else:
+                    new_rows = [
+                        {
+                            column: row.get(column, pd.NA)
+                            for column in self._events_df.columns
+                        }
+                        for row in rows_to_add
+                    ]
+                    self._events_df = pd.DataFrame(
+                        [*self._events_df.to_dict("records"), *new_rows],
+                        columns=self._events_df.columns,
+                    )
+                    for column in [
+                        "detected_at_utc",
+                        "investigation_started_utc",
+                        "report_submitted_utc",
+                    ]:
+                        self._events_df[column] = pd.to_datetime(
+                            self._events_df[column],
+                            utc=True,
+                            errors="coerce",
+                        )
                 self._persist_events()
 
         return CSVAppendResult(imported=imported, skipped=skipped)

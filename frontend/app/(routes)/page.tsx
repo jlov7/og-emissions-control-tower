@@ -194,12 +194,14 @@ export default function HomePage() {
 
   const handleClearAi = (eventId: string) => {
     setAiNotes((prev) => {
-      const { [eventId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      delete next[eventId];
+      return next;
     });
     setAiErrors((prev) => {
-      const { [eventId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      delete next[eventId];
+      return next;
     });
   };
 

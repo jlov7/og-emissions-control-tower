@@ -51,7 +51,7 @@ async function safeParseError(response: Response): Promise<string | null> {
     if (payload && typeof payload.detail === "string") {
       return payload.detail;
     }
-  } catch (error) {
+  } catch {
     // Ignore JSON parse failures and fall back to status text
   }
   return null;

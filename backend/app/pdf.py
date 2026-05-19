@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List
 
-from fpdf import FPDF
+from fpdf import FPDF, XPos, YPos
 
 from .schemas import ActionLogEntry, EventOut, RunbookItem
 
@@ -33,7 +33,14 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
     pdf.add_page()
 
     pdf.set_font("Helvetica", "B", 20)
-    pdf.cell(0, 12, f"Emissions Event Report - {event.id}", ln=True, align="C")
+    pdf.cell(
+        0,
+        12,
+        f"Emissions Event Report - {event.id}",
+        new_x=XPos.LMARGIN,
+        new_y=YPos.NEXT,
+        align="C",
+    )
     pdf.ln(4)
 
     pdf.set_font("Helvetica", "", 12)
@@ -42,7 +49,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
 
     # Event & Site Summary
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Event Overview", ln=True)
+    pdf.cell(0, 8, "Event Overview", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("Helvetica", "", 11)
     pdf.multi_cell(
         0,
@@ -63,7 +70,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
 
     # Triage summary
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Triage Summary", ln=True)
+    pdf.cell(0, 8, "Triage Summary", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("Helvetica", "", 11)
     pdf.multi_cell(
         0,
@@ -80,7 +87,7 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
 
     # SLA table
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "SLA Status", ln=True)
+    pdf.cell(0, 8, "SLA Status", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("Helvetica", "", 11)
     pdf.multi_cell(
         0,
@@ -96,33 +103,51 @@ def generate_event_report_pdf(event: EventOut) -> bytes:
 
     # Runbook checklist
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Runbook Checklist", ln=True)
+    pdf.cell(0, 8, "Runbook Checklist", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("Helvetica", "", 11)
     if event.runbook:
         for item in event.runbook:
             status = "[x]" if item.completed else "[ ]"
             timestamp = _format_dt(item.completed_at_utc)
-            pdf.cell(0, 6, f"{status} {item.label} ({timestamp})", ln=True)
+            pdf.cell(
+                0,
+                6,
+                f"{status} {item.label} ({timestamp})",
+                new_x=XPos.LMARGIN,
+                new_y=YPos.NEXT,
+            )
     else:
-        pdf.cell(0, 6, "No runbook items recorded.", ln=True)
+        pdf.cell(
+            0,
+            6,
+            "No runbook items recorded.",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
     pdf.ln(2)
 
     # Action log
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "Action Log", ln=True)
+    pdf.cell(0, 8, "Action Log", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("Helvetica", "", 11)
     if event.action_log:
         for entry in event.action_log:
             pdf.multi_cell(0, 6, f"{_format_dt(entry.timestamp_utc)} - {entry.message}")
             pdf.ln(1)
     else:
-        pdf.cell(0, 6, "No follow-up actions logged yet.", ln=True)
+        pdf.cell(
+            0,
+            6,
+            "No follow-up actions logged yet.",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
 
     pdf.set_y(-25)
     pdf.set_font("Helvetica", "I", 9)
     pdf.multi_cell(0, 5, "Demo only - synthetic data. Not for operational use.", align="C")
 
-    output = pdf.output(dest="S")
+    output = pdf.output()
     if isinstance(output, str):
         return output.encode("latin1")
     return bytes(output)
